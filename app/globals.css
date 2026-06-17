@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f7f9fb;
+  --bg: #f3f6f8;
   --surface: #ffffff;
-  --ink: #1a2b3a;
-  --muted: #5b7185;
-  --primary: #0e7c7b;
-  --primary-soft: #e6f2f2;
-  --ok: #2e9e6b;
-  --warn: #c98a2b;
-  --alert: #c0463b;
-  --border: #e2e8f0;
+  --ink: #152432;
+  --muted: #5f768b;
+  --primary: #0d9488;
+  --primary-soft: #e8f5f4;
+  --primary-glow: rgba(13, 148, 136, 0.12);
+  --ok: #1e9e6b;
+  --warn: #c2842a;
+  --alert: #c2473e;
+  --border: #e4eaf0;
+  --accent: #f0ebe0;
 }
 
 @theme inline {
@@ -24,22 +26,25 @@
   --color-warn: var(--warn);
   --color-alert: var(--alert);
   --color-border: var(--border);
+  --color-accent: var(--accent);
   --font-display: var(--font-bricolage);
   --font-body: var(--font-inter);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1722;
-    --surface: #1a2332;
-    --ink: #e8edf2;
-    --muted: #8899aa;
-    --primary: #3dbfbd;
-    --primary-soft: #152a2f;
-    --ok: #3dbf7a;
-    --warn: #d4a843;
-    --alert: #d46b5e;
-    --border: #2a3645;
+    --bg: #0b1219;
+    --surface: #131e2b;
+    --ink: #e6eef5;
+    --muted: #7d95aa;
+    --primary: #2dd4bf;
+    --primary-soft: #112622;
+    --primary-glow: rgba(45, 212, 191, 0.08);
+    --ok: #34d399;
+    --warn: #e0a83c;
+    --alert: #e8635a;
+    --border: #1e3045;
+    --accent: #1a1e16;
   }
 }
 
@@ -49,14 +54,48 @@ body {
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInRow {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--primary-glow); }
+  50%      { box-shadow: 0 0 0 8px transparent; }
+}
+
+@keyframes scanLine {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+@keyframes bgShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-fade-in-row {
+  animation: fadeInRow 0.4s ease-out forwards;
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
