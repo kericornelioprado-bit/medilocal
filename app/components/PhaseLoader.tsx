@@ -103,100 +103,114 @@ export default function PhaseLoader() {
     };
   }, []);
 
+  const progressWidth = ((active + 1) / fases.length) * 100;
+
   return (
-    <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-surface p-8">
-      {/* Scanning animation */}
-      <div className="mx-auto mb-8 flex max-w-[280px] flex-col items-center">
-        <div className="relative mb-4 h-40 w-full overflow-hidden rounded-xl border border-border bg-[var(--bg)]">
-          {/* Document outline */}
-          <div className="absolute inset-4 rounded border-2 border-dashed border-muted/20" />
-          {/* Scan line */}
-          <div
-            className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent motion-safe:animate-[scanLine_2s_ease-in-out_infinite]"
-          />
-          {/* Data lines shimmer */}
-          <div className="absolute bottom-8 left-8 right-8 space-y-2">
-            {[80, 55, 70, 40].map((w, i) => (
+    <div className="mt-6 animate-scale-in">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <div className="p-8">
+          <div className="mx-auto mb-8 flex max-w-[280px] flex-col items-center">
+            <div className="relative mb-5 h-40 w-full overflow-hidden rounded-xl border border-border bg-[var(--bg)]">
+              <div className="absolute inset-4 rounded border-2 border-dashed border-muted/15" />
+              <div className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent motion-safe:animate-[scanLine_2s_ease-in-out_infinite]" />
+              <div className="absolute bottom-8 left-8 right-8 space-y-2.5">
+                {[75, 50, 65, 35].map((w, i) => (
+                  <div
+                    key={i}
+                    className="relative h-1.5 overflow-hidden rounded-full bg-muted/8"
+                  >
+                    <div
+                      className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-primary/25 to-transparent motion-safe:animate-[shimmer_1.5s_ease-in-out_infinite]"
+                      style={{ animationDelay: `${i * 200}ms` }}
+                    />
+                    <div
+                      className="h-full rounded-full bg-muted/8"
+                      style={{ width: `${w}%` }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-center font-display text-sm font-medium text-ink">
+              Leyendo tu documento…
+            </p>
+          </div>
+
+          <div className="relative mb-5">
+            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--bg)]">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-700 ease-out"
+                style={{ width: `${progressWidth}%` }}
+              />
+            </div>
+            <div className="mt-1.5 flex justify-between">
+              {fases.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i <= active ? "bg-primary/30 w-4" : "bg-transparent w-2"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            {fases.map((fase, i) => (
               <div
                 key={i}
-                className="relative h-1.5 overflow-hidden rounded-full bg-muted/10"
+                className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-500 ${
+                  active === i ? "bg-[var(--primary-soft)]/50" : ""
+                }`}
               >
-                <div
-                  className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-primary/30 to-transparent motion-safe:animate-[shimmer_1.5s_ease-in-out_infinite]"
-                  style={{ animationDelay: `${i * 200}ms` }}
+                <IconPhase
+                  phase={fase.icon}
+                  active={active === i}
+                  done={i < active}
                 />
-                <div
-                  className="h-full rounded-full bg-muted/10"
-                  style={{ width: `${w}%` }}
-                />
+                <div className="flex-1">
+                  <p
+                    className={`text-sm font-medium transition-colors duration-300 ${
+                      i <= active ? "text-ink" : "text-muted/40"
+                    }`}
+                  >
+                    {fase.label}
+                  </p>
+                  <p
+                    className={`text-xs transition-colors duration-300 ${
+                      i <= active ? "text-muted" : "text-muted/30"
+                    }`}
+                  >
+                    {fase.desc}
+                  </p>
+                </div>
+                {active === i && (
+                  <div className="flex gap-1">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:120ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:240ms]" />
+                  </div>
+                )}
+                {i < active && (
+                  <svg
+                    className="h-4 w-4 text-ok"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2.5}
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4.5 12.75l6 6 9-13.5"
+                    />
+                  </svg>
+                )}
               </div>
             ))}
           </div>
         </div>
-
-        <p className="text-center font-display text-sm font-medium text-ink">
-          Leyendo tu documento…
-        </p>
-      </div>
-
-      {/* Phase indicators */}
-      <div className="space-y-1">
-        {fases.map((fase, i) => (
-          <div
-            key={i}
-            className={`flex items-center gap-4 rounded-xl px-4 py-3 transition-all duration-500 ${
-              active === i
-                ? "bg-[var(--primary-soft)]/50"
-                : i < active
-                  ? ""
-                  : ""
-            }`}
-          >
-            <IconPhase
-              phase={fase.icon}
-              active={active === i}
-              done={i < active}
-            />
-            <div className="flex-1">
-              <p
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  i <= active ? "text-ink" : "text-muted/40"
-                }`}
-              >
-                {fase.label}
-              </p>
-              <p
-                className={`text-xs transition-colors duration-300 ${
-                  i <= active ? "text-muted" : "text-muted/30"
-                }`}
-              >
-                {fase.desc}
-              </p>
-            </div>
-            {active === i && (
-              <div className="flex gap-1">
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:120ms]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:240ms]" />
-              </div>
-            )}
-            {i < active && (
-              <svg
-                className="h-4 w-4 text-ok"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.5 12.75l6 6 9-13.5"
-                />
-              </svg>
-            )}
-          </div>
-        ))}
       </div>
     </div>
   );

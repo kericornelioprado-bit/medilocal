@@ -46,6 +46,27 @@ const HISTORY_KEY = "mediclaro_history_v2";
 const MAX_HISTORY = 3;
 const MAX_SIZE_BYTES = 1.5 * 1024 * 1024;
 
+const tipoDocMeta: Record<
+  string,
+  { label: string; icon: string; color: string }
+> = {
+  laboratorio: {
+    label: "Estudio de laboratorio",
+    icon: "chart",
+    color: "primary",
+  },
+  receta: {
+    label: "Receta médica",
+    icon: "pill",
+    color: "ok",
+  },
+  otro: {
+    label: "Documento no médico",
+    icon: "doc",
+    color: "warn",
+  },
+};
+
 function chipConfianza(confianza: AnalysisResult["confianza"]) {
   const config = {
     alta: { dot: "bg-ok", label: "Confianza alta", width: "w-full" },
@@ -65,22 +86,44 @@ function chipConfianza(confianza: AnalysisResult["confianza"]) {
   );
 }
 
+function TipoIcon({ tipo }: { tipo: string }) {
+  const meta = tipoDocMeta[tipo];
+  if (!meta) return null;
+
+  const colorClass =
+    meta.color === "primary"
+      ? "bg-primary/10 text-primary"
+      : meta.color === "ok"
+        ? "bg-ok/10 text-ok"
+        : "bg-warn/10 text-warn";
+
+  return (
+    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
+      {tipo === "laboratorio" && (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+        </svg>
+      )}
+      {tipo === "receta" && (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+        </svg>
+      )}
+      {tipo === "otro" && (
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 function StepsSection() {
   const steps = [
     {
       icon: (
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-          />
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
         </svg>
       ),
       title: "Sube tu documento",
@@ -88,18 +131,8 @@ function StepsSection() {
     },
     {
       icon: (
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"
-          />
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
         </svg>
       ),
       title: "La IA lo analiza",
@@ -107,18 +140,8 @@ function StepsSection() {
     },
     {
       icon: (
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"
-          />
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
         </svg>
       ),
       title: "Entiende tus resultados",
@@ -127,14 +150,19 @@ function StepsSection() {
   ];
 
   return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-3">
+    <div className="mt-12 grid gap-4 sm:grid-cols-3">
       {steps.map((s, i) => (
         <div
           key={i}
-          className="group rounded-2xl border border-border bg-surface p-5 transition hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5"
+          className="group rounded-2xl border border-border bg-surface p-5 card-hover"
         >
-          <div className="mb-3 inline-flex rounded-xl bg-[var(--primary-soft)] p-2.5 text-primary transition group-hover:scale-110 group-hover:bg-primary group-hover:text-white">
-            {s.icon}
+          <div className="mb-3 flex items-center gap-3">
+            <div className="inline-flex rounded-xl bg-[var(--primary-soft)] p-2.5 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/20">
+              {s.icon}
+            </div>
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--bg)] text-xs font-bold text-muted">
+              {i + 1}
+            </span>
           </div>
           <h3 className="mb-1 font-display text-sm font-semibold text-ink">
             {s.title}
@@ -154,6 +182,7 @@ export default function Home() {
   const [fileName, setFileName] = useState<string>("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     try {
@@ -303,9 +332,9 @@ export default function Home() {
       const previewSmall =
         preview ||
         (await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = (e) => resolve(e.target?.result as string);
-          reader.readAsDataURL(file);
+          const reader2 = new FileReader();
+          reader2.onload = (e) => resolve(e.target?.result as string);
+          reader2.readAsDataURL(file);
         }));
 
       saveToHistory({
@@ -327,35 +356,48 @@ export default function Home() {
     setErrorMsg("");
     setPreview("");
     setFileName("");
+    setCopied(false);
     selectedFileRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const tipoDocLabel: Record<string, string> = {
-    laboratorio: "Estudio de laboratorio",
-    receta: "Receta médica",
-    otro: "Documento no médico",
+  const copyResults = async () => {
+    if (!result) return;
+    let text = `${result.titulo}\n\n${result.resumen}\n`;
+    if (result.estudios) {
+      text += "\nEstudios:\n";
+      result.estudios.forEach((e) => {
+        text += `- ${e.nombre}: ${e.valor} ${e.unidad} (${e.estado === "normal" ? "Normal" : e.estado === "alto" ? "Alto" : e.estado === "bajo" ? "Bajo" : "Sin rango"})\n`;
+      });
+    }
+    if (result.medicamentos) {
+      text += "\nMedicamentos:\n";
+      result.medicamentos.forEach((m) => {
+        text += `- ${m.nombre}: ${m.como_tomar}` + (m.duracion !== "No especificado" ? ` (${m.duracion})` : "") + "\n";
+      });
+    }
+    text += `\n${result.descargo}`;
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const showIdleUI = state === "idle" || state === "error";
 
   return (
     <div className="flex flex-col flex-1 items-center">
-      {/* Animated gradient */}
       <div
-        className="pointer-events-none fixed inset-0 -z-10 opacity-30 motion-safe:animate-[bgShift_15s_ease_infinite]"
+        className="pointer-events-none fixed inset-0 -z-10 opacity-25"
         style={{
           background:
-            "radial-gradient(circle at 30% 20%, var(--primary-glow) 0%, transparent 50%), radial-gradient(circle at 70% 80%, var(--primary-glow) 0%, transparent 50%)",
-          backgroundSize: "200% 200%",
+            "radial-gradient(ellipse 80% 50% at 50% -10%, var(--primary-glow) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 80%, var(--primary-glow) 0%, transparent 60%)",
         }}
       />
 
       <main className="w-full max-w-[720px] px-4 py-8 sm:py-14">
-        {/* Hero */}
         {showIdleUI && (
           <div className="mb-10 text-center animate-fade-in">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20 motion-safe:animate-[float_4s_ease-in-out_infinite]">
+            <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25 motion-safe:animate-[float_4s_ease-in-out_infinite]">
               <svg
                 className="h-8 w-8 text-white"
                 fill="none"
@@ -369,6 +411,7 @@ export default function Home() {
                   d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"
                 />
               </svg>
+              <div className="absolute -inset-1 rounded-2xl bg-primary/20 motion-safe:animate-[pulseGlow_3s_ease-in-out_infinite]" />
             </div>
             <h1 className="font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
               MediClaro
@@ -380,8 +423,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* Disclaimer */}
-        <div className="mb-6 flex items-start gap-2.5 rounded-xl border border-border/60 bg-surface/80 px-4 py-3 text-sm text-muted backdrop-blur-sm">
+        <div
+          className={`mb-6 flex items-start gap-2.5 rounded-xl border border-border/60 glass-card px-4 py-3 text-sm text-muted transition-all duration-500 ${
+            showIdleUI ? "animate-slide-down" : ""
+          }`}
+        >
           <svg
             className="mt-0.5 h-4 w-4 shrink-0 text-muted/60"
             fill="none"
@@ -396,12 +442,10 @@ export default function Home() {
             />
           </svg>
           <span>
-            Esta herramienta es informativa y NO sustituye la consulta con un
-            profesional de la salud.
+            Esta herramienta es informativa y <strong>NO sustituye</strong> la consulta con un profesional de la salud.
           </span>
         </div>
 
-        {/* Dropzone */}
         {state !== "success" && state !== "loading" && (
           <div
             onDragOver={(e) => {
@@ -412,13 +456,12 @@ export default function Home() {
             onDrop={handleDrop}
             className={`group relative overflow-hidden rounded-2xl border-2 border-dashed p-10 text-center transition-all duration-300 ${
               dragging
-                ? "scale-[1.01] border-primary bg-primary/5 shadow-lg shadow-primary/10"
+                ? "scale-[1.01] border-primary bg-primary/5 shadow-xl shadow-primary/10"
                 : preview
-                  ? "border-border/80 bg-surface"
+                  ? "border-primary/40 bg-surface"
                   : "border-border/60 bg-surface/60 hover:border-primary/30 hover:bg-surface"
             }`}
           >
-            {/* Pulsing glow when empty */}
             {!preview && (
               <div className="pointer-events-none absolute inset-0 motion-safe:animate-[pulseGlow_3s_ease-in-out_infinite]" />
             )}
@@ -436,11 +479,18 @@ export default function Home() {
 
             {preview ? (
               <div className="flex flex-col items-center gap-4">
-                <img
-                  src={preview}
-                  alt="Vista previa"
-                  className="max-h-52 rounded-xl object-contain shadow-lg transition-transform group-hover:scale-[1.02]"
-                />
+                <div className="relative">
+                  <img
+                    src={preview}
+                    alt="Vista previa"
+                    className="max-h-52 rounded-xl object-contain shadow-lg transition-transform group-hover:scale-[1.02]"
+                  />
+                  <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-ok text-white shadow-md">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  </div>
+                </div>
                 <p className="text-sm font-medium text-ink">{fileName}</p>
                 <button
                   type="button"
@@ -483,7 +533,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Analyze button */}
         {state !== "success" && state !== "loading" && (
           <div className="mt-5 flex flex-col items-center">
             <button
@@ -513,13 +562,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* Loading */}
         {state === "loading" && <PhaseLoader />}
 
-        {/* Error */}
         {state === "error" && (
-          <div className="mt-6 animate-fade-in rounded-2xl border border-[var(--alert)]/20 bg-[var(--alert)]/5 p-6 text-center">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--alert)]/10">
+          <div className="mt-6 animate-scale-in rounded-2xl border border-alert/20 bg-alert/5 p-6 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-alert/10">
               <svg
                 className="h-5 w-5 text-alert"
                 fill="none"
@@ -537,7 +584,7 @@ export default function Home() {
             <p className="text-sm text-ink mb-3">{errorMsg}</p>
             <button
               onClick={reset}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary transition hover:opacity-80"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-alert/10 px-4 py-2 text-sm font-medium text-alert transition hover:bg-alert/20 focus:outline-none focus:ring-2 focus:ring-alert focus:ring-offset-2"
             >
               <svg
                 className="h-4 w-4"
@@ -557,11 +604,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* Success */}
         {state === "success" && result && (
           <div className="mt-6 space-y-5 animate-fade-in">
-            {/* Result header */}
-            <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-border glass-card p-4">
               {preview && (
                 <img
                   src={preview}
@@ -570,10 +615,13 @@ export default function Home() {
                 />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider text-muted mb-0.5">
-                  {tipoDocLabel[result.tipo_documento] ??
-                    result.tipo_documento}
-                </p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <TipoIcon tipo={result.tipo_documento} />
+                  <p className="text-xs uppercase tracking-wider text-muted">
+                    {tipoDocMeta[result.tipo_documento]?.label ??
+                      result.tipo_documento}
+                  </p>
+                </div>
                 <h2 className="font-display text-lg font-semibold text-ink truncate">
                   {result.titulo}
                 </h2>
@@ -581,17 +629,45 @@ export default function Home() {
                   {chipConfianza(result.confianza)}
                 </div>
               </div>
-              <button
-                onClick={reset}
-                className="shrink-0 rounded-lg bg-[var(--primary-soft)] px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              >
-                Nuevo análisis
-              </button>
+              <div className="flex flex-col gap-2 shrink-0">
+                <button
+                  onClick={reset}
+                  className="rounded-lg bg-[var(--primary-soft)] px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary hover:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  Nuevo análisis
+                </button>
+                <button
+                  onClick={copyResults}
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-lg border border-border px-4 py-2 text-xs font-medium transition focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                    copied
+                      ? "border-ok/30 bg-ok/5 text-ok"
+                      : "border-border bg-surface text-muted hover:border-primary/20 hover:text-ink"
+                  }`}
+                >
+                  {copied ? (
+                    <>
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                      Copiado
+                    </>
+                  ) : (
+                    <>
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0a.75.75 0 011.5 0v0a.75.75 0 01-.75.75H14.25h.008a.75.75 0 01-.75-.75v0m0 0H9.75m0 0H8.25" />
+                      </svg>
+                      Copiar
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Resumen */}
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted/70">
+            <div className="rounded-2xl border border-border bg-surface p-5 animate-slide-up">
+              <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted/70 flex items-center gap-1.5">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
                 Resumen
               </h3>
               <p className="text-sm leading-relaxed text-ink">
@@ -599,44 +675,36 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Type-specific */}
             {result.tipo_documento === "laboratorio" &&
               result.estudios &&
               result.estudios.length > 0 && (
-                <div className="animate-fade-in">
-                  <ResultadoLaboratorio estudios={result.estudios} />
-                </div>
+                <ResultadoLaboratorio estudios={result.estudios} />
               )}
 
             {result.tipo_documento === "receta" &&
               result.medicamentos &&
               result.medicamentos.length > 0 && (
-                <div className="animate-fade-in">
-                  <ResultadoReceta
-                    medicamentos={result.medicamentos}
-                    indicaciones={result.indicaciones_adicionales ?? []}
-                    confianza={result.confianza}
-                  />
-                </div>
+                <ResultadoReceta
+                  medicamentos={result.medicamentos}
+                  indicaciones={result.indicaciones_adicionales ?? []}
+                  confianza={result.confianza}
+                />
               )}
 
             {result.tipo_documento === "otro" && (
               <ResultadoOtro resumen={result.resumen} onReset={reset} />
             )}
 
-            {/* Descargo */}
-            <p className="text-center text-xs text-muted/60 italic">
+            <p className="text-center text-xs text-muted/50 italic">
               {result.descargo}
             </p>
           </div>
         )}
 
-        {/* How it works — only on idle */}
         {state === "idle" && <StepsSection />}
 
-        {/* History */}
         {historyLoaded && history.length > 0 && state === "idle" && (
-          <div className="mt-12">
+          <div className="mt-12 animate-fade-in">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted/60">
               Análisis recientes
             </h2>
@@ -650,7 +718,7 @@ export default function Home() {
                     setPreview(entry.preview);
                     setState("success");
                   }}
-                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-3 text-left transition hover:border-primary/20 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-surface p-3 text-left card-hover focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
                 >
                   <img
                     src={entry.preview}
@@ -658,9 +726,12 @@ export default function Home() {
                     className="h-12 w-12 shrink-0 rounded-lg object-cover shadow-sm"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">
-                      {entry.result.titulo}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <TipoIcon tipo={entry.result.tipo_documento} />
+                      <p className="text-sm font-medium text-ink truncate">
+                        {entry.result.titulo}
+                      </p>
+                    </div>
                     <p className="text-xs text-muted">
                       {new Date(entry.timestamp).toLocaleString("es", {
                         dateStyle: "medium",
@@ -675,7 +746,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Footer */}
         {showIdleUI && (
           <p className="mt-14 text-center text-xs text-muted/40">
             Hecho con fines educativos — Proyecto final de Inteligencia

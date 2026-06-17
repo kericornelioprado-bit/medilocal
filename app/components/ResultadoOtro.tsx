@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export default function ResultadoOtro({
   resumen,
   onReset,
@@ -7,12 +9,24 @@ export default function ResultadoOtro({
   resumen: string;
   onReset: () => void;
 }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), 200);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="flex flex-col items-center gap-5 py-10 text-center animate-fade-in">
+    <div
+      className={`flex flex-col items-center gap-6 py-12 text-center transition-all duration-700 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      }`}
+    >
       <div className="relative">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[var(--primary-soft)]">
+        <div className="absolute -inset-3 rounded-3xl bg-accent/30 motion-safe:animate-[gentlePulse_3s_ease-in-out_infinite]" />
+        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-accent/60">
           <svg
-            className="h-9 w-9 text-primary"
+            className="h-9 w-9 text-warn"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={1.5}
@@ -21,20 +35,22 @@ export default function ResultadoOtro({
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
             />
           </svg>
         </div>
       </div>
+
       <div className="max-w-sm">
         <h2 className="font-display text-lg font-semibold text-ink mb-2">
           No se encontró un documento médico
         </h2>
         <p className="text-sm leading-relaxed text-muted">{resumen}</p>
       </div>
+
       <button
         onClick={onReset}
-        className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-primary/30 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 active:translate-y-0"
       >
         <svg
           className="h-4 w-4"
